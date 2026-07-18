@@ -35,9 +35,15 @@ Si no completás las keys, el proyecto corre con **datos demo** y persiste seña
 
 ### 1. SDK Web (1 línea)
 
+Funciona en **cualquier web externa** — el endpoint se autodetecta del origen del script. Andá a `/connect` para generar el snippet y verificar la conexión en vivo:
+
 ```html
-<script src="/feedback.js" async data-survey="true"></script>
+<script src="https://TU-FEEDBACKLOOP.vercel.app/feedback.js" async data-survey="true"></script>
 ```
+
+En la propia app basta con `src="/feedback.js"`. Con `data-site="mi-app"` podés nombrar el sitio (default: hostname).
+
+Sin `data-question`, las micro-encuestas son **contextuales**: la pregunta y las opciones (tipo radio, un tap) cambian según el comportamiento detectado — rage click ("¿Qué intentabas hacer recién?"), dead clicks, usuario dando vueltas o exit intent. Así el feedback llega en el momento justo y de todos los usuarios, no solo de los que llenan formularios.
 
 Con pregunta personalizada:
 

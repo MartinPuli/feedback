@@ -12,6 +12,7 @@ type Signal = {
   selector?: string;
   timestamp: string;
   source: string;
+  site?: string;
 };
 
 type Connector = {
@@ -177,14 +178,17 @@ export default function Home() {
   }, [load]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    if (saved) {
-      setTheme(saved);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-    } else {
-      setTheme('light');
-    }
+    const id = requestAnimationFrame(() => {
+      const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
+      if (saved) {
+        setTheme(saved);
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark');
+      } else {
+        setTheme('light');
+      }
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   useEffect(() => {
@@ -293,6 +297,9 @@ export default function Home() {
             </Link>
             <Link href="/demo" className="text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
               Demo
+            </Link>
+            <Link href="/connect" className="text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Conectar
             </Link>
             <a href="/presentation.html" className="text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
               Presentación
@@ -454,6 +461,11 @@ export default function Home() {
                         </span>
                         <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">{signal.page}</span>
                         <span className="text-[10px] text-zinc-400 px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800">{signal.source}</span>
+                        {signal.site && (
+                          <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                            🌐 {signal.site}
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1 line-clamp-2">{signal.message}</p>
                       {signal.selector && (

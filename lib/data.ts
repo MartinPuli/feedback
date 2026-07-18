@@ -10,6 +10,7 @@ export type FeedbackSignal = {
   selector?: string;
   timestamp: string;
   source: string;
+  site?: string;
 };
 
 const demos: FeedbackSignal[] = [

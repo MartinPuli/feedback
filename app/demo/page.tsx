@@ -90,8 +90,6 @@ export default function DemoPage() {
     script.src = '/feedback.js';
     script.async = true;
     script.dataset.survey = 'true';
-    script.dataset.question = '¿Qué te costó de esta página?';
-    script.dataset.options = 'Precios,Funcionalidad,Diseño,No encontré algo,Otro';
     document.head.appendChild(script);
 
     fetch('/api/simulate')
@@ -204,6 +202,9 @@ export default function DemoPage() {
             <Link href="/demo" className="text-indigo-600 dark:text-indigo-400 relative">
               Demo
               <span className="absolute -bottom-[22px] left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-full" />
+            </Link>
+            <Link href="/connect" className="text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Conectar
             </Link>
             <a href="/presentation.html" className="text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors hidden sm:inline">
               Presentación

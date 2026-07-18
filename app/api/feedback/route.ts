@@ -31,6 +31,7 @@ function normalize(raw: IncomingSignal): Omit<FeedbackSignal, 'id' | 'timestamp'
     message: raw.message.trim().slice(0, MAX_MESSAGE_LENGTH),
     selector: typeof raw.selector === 'string' ? raw.selector.slice(0, 200) : undefined,
     source: typeof raw.source === 'string' && raw.source.trim() ? raw.source.slice(0, 30) : 'sdk',
+    site: typeof raw.site === 'string' && raw.site.trim() ? raw.site.trim().slice(0, 100) : undefined,
   };
 }
 

@@ -1,15 +1,30 @@
 /*
-  FeedbackLoop Smart SDK - v0.3
-  Uso:
-    <script src="/feedback.js" async data-survey="true"></script>
-    <script src="/feedback.js" async data-survey="true" data-question="¿Qué te falta?" data-options="Precios,Funciones,Soporte"></script>
-    <script src="/feedback.js" async data-survey="nps"></script>
+  FeedbackLoop Smart SDK - v0.4
+  Uso en cualquier web (el endpoint se detecta del origen del script):
+    <script src="https://TU-FEEDBACKLOOP.vercel.app/feedback.js" async data-survey="true"></script>
+  Opcional:
+    data-site="mi-sitio.com"        identificador del sitio (default: hostname)
+    data-endpoint="https://..."     endpoint custom
+    data-question / data-options    encuesta genérica custom
+    data-survey="nps"               modo NPS
 */
 (function () {
   'use strict';
 
   const script = document.currentScript || document.querySelector('script[src*="feedback.js"]');
-  const endpoint = script?.dataset?.endpoint || '/api/feedback';
+
+  // Endpoint: autodetectado del origen del script para funcionar en sitios externos con 1 línea.
+  let endpoint = script?.dataset?.endpoint;
+  if (!endpoint) {
+    try {
+      const scriptOrigin = new URL(script.src, location.href).origin;
+      endpoint = scriptOrigin === location.origin ? '/api/feedback' : scriptOrigin + '/api/feedback';
+    } catch {
+      endpoint = '/api/feedback';
+    }
+  }
+
+  const site = script?.dataset?.site || location.hostname;
   const surveyEnabled = script?.dataset?.survey === 'true' || script?.dataset?.survey === 'nps';
   const surveyQuestion =
     script?.dataset?.question ||
@@ -18,6 +33,26 @@
     script?.dataset?.survey === 'nps'
       ? []
       : (script?.dataset?.options || 'Precios,Funcionalidad,Diseño,No encontré algo,Otro').split(',');
+
+  // Encuestas contextuales: pregunta corta con opciones tipo radio según el comportamiento detectado.
+  const contextualSurveys = {
+    rage_click: {
+      question: '¿Qué intentabas hacer recién?',
+      options: ['El botón no responde', 'Esperaba otra cosa al hacer click', 'La página está lenta', 'Solo probaba'],
+    },
+    dead_click: {
+      question: '¿Esperabas que eso fuera clickeable?',
+      options: ['Sí, parecía un botón/link', 'Buscaba más información', 'Click sin querer'],
+    },
+    idle: {
+      question: '¿Encontraste lo que buscabas?',
+      options: ['Sí, todo bien', 'Todavía estoy buscando', 'No encuentro lo que necesito'],
+    },
+    exit: {
+      question: '¿Qué te hizo querer salir?',
+      options: ['Ya terminé lo que vine a hacer', 'No encontré lo que buscaba', 'Algo no funcionó', 'Solo miraba'],
+    },
+  };
 
   // Session id persistente para agrupar señales del mismo usuario
   let sessionId;
@@ -44,15 +79,20 @@
 
     const body = JSON.stringify({
       ...payload,
+      site,
       sessionId,
       timestamp: new Date().toISOString(),
     });
-    if (navigator.sendBeacon) {
+    // sendBeacon con application/json falla cross-origin (no soporta preflight);
+    // solo lo usamos same-origin. Cross-origin: fetch keepalive con content-type
+    // simple (sin preflight) — la API parsea el JSON del body igual.
+    const sameOrigin = endpoint.startsWith('/');
+    if (sameOrigin && navigator.sendBeacon) {
       navigator.sendBeacon(endpoint, new Blob([body], { type: 'application/json' }));
     } else {
       fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': sameOrigin ? 'application/json' : 'text/plain;charset=UTF-8' },
         body,
         keepalive: true,
       }).catch(() => {});
@@ -256,12 +296,13 @@
 
       if (shouldAsk) {
         behavior.surveyShown = true;
-        setTimeout(showSurvey, 500);
+        const trigger = behavior.rageClicks >= 1 ? 'rage_click' : behavior.deadClicks >= 2 ? 'dead_click' : 'idle';
+        setTimeout(() => showSurvey(trigger), 500);
       }
     }
   }
 
-  function showSurvey() {
+  function showSurvey(trigger) {
     const root = document.createElement('div');
     root.id = 'feedbackloop-survey';
     const styles = {
@@ -281,9 +322,12 @@
     Object.assign(root.style, styles);
 
     const isNps = script?.dataset?.survey === 'nps';
+    const contextual = !isNps && !script?.dataset?.question && contextualSurveys[trigger];
+    const question = contextual ? contextual.question : surveyQuestion;
+    const options = contextual ? contextual.options : surveyOptions;
 
     let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <strong style="font-size:14px">${escapeHtml(surveyQuestion)}</strong>
+      <strong style="font-size:14px">${escapeHtml(question)}</strong>
       <button id="fl-close" style="background:none;border:none;cursor:pointer;font-size:18px;color:#6b7280">×</button>
     </div>`;
 
@@ -295,8 +339,8 @@
       html += `</div>`;
     } else {
       html += `<div style="display:flex;flex-direction:column;gap:8px">`;
-      surveyOptions.forEach((opt) => {
-        html += `<button class="fl-opt" style="text-align:left;padding:10px 12px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-size:13px;color:#374151">${escapeHtml(opt)}</button>`;
+      options.forEach((opt) => {
+        html += `<button class="fl-opt" style="display:flex;align-items:center;gap:8px;text-align:left;padding:10px 12px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-size:13px;color:#374151"><span style="width:14px;height:14px;border-radius:50%;border:2px solid #9ca3af;flex-shrink:0;display:inline-block"></span>${escapeHtml(opt)}</button>`;
       });
       html += `</div>`;
       html += `<div style="display:flex;gap:6px;margin-top:8px">
@@ -312,7 +356,8 @@
     close?.addEventListener('click', () => root.remove());
 
     function submitAnswer(message, severity) {
-      send({ type: 'micro_survey', severity: severity || 'info', page: location.pathname, message });
+      const ctx = trigger && trigger !== 'generic' ? ` [tras ${trigger}]` : '';
+      send({ type: 'micro_survey', severity: severity || 'info', page: location.pathname, message: message + ctx, selector: trigger || undefined });
       showThanks(root);
     }
 
@@ -325,7 +370,7 @@
       });
     } else {
       root.querySelectorAll('.fl-opt').forEach((btn) => {
-        btn.addEventListener('click', () => submitAnswer(`Respuesta: ${btn.textContent}`));
+        btn.addEventListener('click', () => submitAnswer(`Respuesta: ${btn.textContent.trim()}`, trigger === 'rage_click' || trigger === 'dead_click' ? 'warning' : 'info'));
       });
       const freeInput = root.querySelector('#fl-free');
       const sendBtn = root.querySelector('#fl-send');
@@ -359,7 +404,7 @@
   document.addEventListener('mouseout', (e) => {
     if (surveyEnabled && !behavior.surveyShown && e.clientY < 10) {
       behavior.surveyShown = true;
-      showSurvey();
+      showSurvey('exit');
     }
   });
 })();
