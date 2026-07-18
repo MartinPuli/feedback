@@ -1,5 +1,5 @@
 /*
-  FeedbackLoop Smart SDK - v0.2
+  FeedbackLoop Smart SDK - v0.3
   Uso:
     <script src="/feedback.js" async data-survey="true"></script>
     <script src="/feedback.js" async data-survey="true" data-question="¿Qué te falta?" data-options="Precios,Funciones,Soporte"></script>
@@ -19,9 +19,32 @@
       ? []
       : (script?.dataset?.options || 'Precios,Funcionalidad,Diseño,No encontré algo,Otro').split(',');
 
+  // Session id persistente para agrupar señales del mismo usuario
+  let sessionId;
+  try {
+    sessionId = sessionStorage.getItem('fl-session');
+    if (!sessionId) {
+      sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      sessionStorage.setItem('fl-session', sessionId);
+    }
+  } catch {
+    sessionId = Math.random().toString(36).slice(2);
+  }
+
+  // Dedupe: no enviar la misma señal repetida en una ventana corta
+  const recentSends = new Map();
+  const DEDUPE_WINDOW = 5000;
+
   function send(payload) {
+    const key = payload.type + '|' + (payload.selector || payload.message);
+    const now = Date.now();
+    const last = recentSends.get(key);
+    if (last && now - last < DEDUPE_WINDOW) return;
+    recentSends.set(key, now);
+
     const body = JSON.stringify({
       ...payload,
+      sessionId,
       timestamp: new Date().toISOString(),
     });
     if (navigator.sendBeacon) {
@@ -107,6 +130,39 @@
       message: e.reason?.message || e.reason?.toString() || 'Unhandled rejection',
     });
   });
+
+  // Errores de red: intercepta fetch para detectar respuestas 5xx/fallos
+  const originalFetch = window.fetch;
+  window.fetch = function (...args) {
+    const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+    const isInternal = url.includes(endpoint);
+    return originalFetch.apply(this, args).then(
+      (res) => {
+        if (!isInternal && res.status >= 500) {
+          send({
+            type: 'network_error',
+            severity: 'critical',
+            page: location.pathname,
+            message: `Request falló: ${res.status} en ${url.slice(0, 120)}`,
+            selector: url.slice(0, 120),
+          });
+        }
+        return res;
+      },
+      (err) => {
+        if (!isInternal) {
+          send({
+            type: 'network_error',
+            severity: 'critical',
+            page: location.pathname,
+            message: `Request no completado: ${err?.message || 'network error'} en ${url.slice(0, 120)}`,
+            selector: url.slice(0, 120),
+          });
+        }
+        throw err;
+      }
+    );
+  };
 
   window.addEventListener('popstate', () => {
     const current = location.pathname;
@@ -243,6 +299,10 @@
         html += `<button class="fl-opt" style="text-align:left;padding:10px 12px;border-radius:8px;border:1px solid #e5e7eb;background:#f9fafb;cursor:pointer;font-size:13px;color:#374151">${escapeHtml(opt)}</button>`;
       });
       html += `</div>`;
+      html += `<div style="display:flex;gap:6px;margin-top:8px">
+        <input id="fl-free" type="text" placeholder="O contanos con tus palabras..." style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid #e5e7eb;font-size:12px;color:#374151;outline:none" />
+        <button id="fl-send" style="padding:8px 12px;border-radius:8px;border:none;background:#6366f1;color:#fff;cursor:pointer;font-size:12px;font-weight:600">Enviar</button>
+      </div>`;
     }
 
     root.innerHTML = html;
@@ -251,22 +311,44 @@
     const close = root.querySelector('#fl-close');
     close?.addEventListener('click', () => root.remove());
 
+    function submitAnswer(message, severity) {
+      send({ type: 'micro_survey', severity: severity || 'info', page: location.pathname, message });
+      showThanks(root);
+    }
+
     if (isNps) {
       root.querySelectorAll('.fl-nps').forEach((btn) => {
         btn.addEventListener('click', () => {
-          const v = btn.getAttribute('data-v');
-          send({ type: 'micro_survey', severity: 'info', page: location.pathname, message: `NPS: ${v}` });
-          root.remove();
+          const v = Number(btn.getAttribute('data-v'));
+          submitAnswer(`NPS: ${v}`, v <= 6 ? 'warning' : 'info');
         });
       });
     } else {
       root.querySelectorAll('.fl-opt').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          send({ type: 'micro_survey', severity: 'info', page: location.pathname, message: `Respuesta: ${btn.textContent}` });
-          root.remove();
-        });
+        btn.addEventListener('click', () => submitAnswer(`Respuesta: ${btn.textContent}`));
+      });
+      const freeInput = root.querySelector('#fl-free');
+      const sendBtn = root.querySelector('#fl-send');
+      const sendFree = () => {
+        const text = freeInput?.value?.trim();
+        if (text) submitAnswer(`Respuesta libre: ${text}`);
+      };
+      sendBtn?.addEventListener('click', sendFree);
+      freeInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') sendFree();
       });
     }
+  }
+
+  function showThanks(root) {
+    root.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:4px">
+      <span style="font-size:22px">💜</span>
+      <div>
+        <strong style="font-size:14px;display:block">¡Gracias por tu feedback!</strong>
+        <span style="font-size:12px;color:#6b7280">Nos ayuda a mejorar el producto.</span>
+      </div>
+    </div>`;
+    setTimeout(() => root.remove(), 2500);
   }
 
   function escapeHtml(str) {
