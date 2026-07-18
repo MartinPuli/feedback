@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FeedbackLoop v2.0 — Presentación de Mejoras</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-2: #1a1a25;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f0f5;
+    --text-muted: #8888a0;
+    --indigo: #6366f1;
+    --violet: #8b5cf6;
+    --cyan: #06b6d4;
+    --emerald: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --pink: #ec4899;
+  }
+  
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+  
+  .slide {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .slide-content {
+    max-width: 1100px;
+    width: 100%;
+  }
+  
+  /* Slide indicators */
+  .slide-num {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 2px;
+  }
+  
+  .slide-label {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    font-size: 13px;
+    color: var(--indigo);
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  .animate-float { animation: float 4s ease-in-out infinite; }
+  .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+  
+  /* === SLIDE 1: HERO === */
+  .hero {
+    text-align: center;
+  }
+  
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--indigo);
+    margin-bottom: 32px;
+  }
+  
+  .hero h1 {
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #fff 0%, #a5a5c0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .hero h1 .gradient {
+    background: linear-gradient(135deg, var(--indigo), var(--violet), var(--cyan));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 4s ease infinite;
+  }
+  
+  .hero p {
+    font-size: 20px;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 40px;
+  }
+  
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    justify-content: center;
+    margin-top: 60px;
+  }
+  
+  .hero-stat {
+    text-align: center;
+  }
+  
+  .hero-stat .num {
+    font-size: 42px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--indigo), var(--violet));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .hero-stat .label {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  
+  /* === SLIDE 2: PROBLEMA === */
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--indigo);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  
+  .slide h2 {
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+  
+  .slide .subtitle {
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 700px;
+    margin-bottom: 48px;
+  }
+  
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  
+  .problem-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: all 0.3s;
+  }
+  
+  .problem-card:hover {
+    border-color: rgba(239,68,68,0.3);
+    transform: translateY(-4px);
+  }
+  
+  .problem-card .icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  
+  .problem-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  
+  .problem-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  
+  /* === SLIDE 3: MEJORAS DE DISEÑO === */
+  .improvement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  
+  .improvement-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  
+  .improvement-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--indigo), var(--violet));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .improvement-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(99,102,241,0.3);
+  }
+  
+  .improvement-card:hover::before {
+    opacity: 1;
+  }
+  
+  .improvement-card .num {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--indigo);
+    margin-bottom: 12px;
+  }
+  
+  .improvement-card h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  
+  .improvement-card p {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  
+  .improvement-card .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .tag {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    background: rgba(99,102,241,0.1);
+    color: var(--indigo);
+    font-weight: 500;
+  }
+  
+  /* === SLIDE 4: BEFORE/AFTER === */
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  
+  .comparison-panel {
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  
+  .comparison-panel.before {
+    background: #1a1a1a;
+  }
+  
+  .comparison-panel.after {
+    background: var(--surface);
+    border-color: rgba(99,102,241,0.3);
+    box-shadow: 0 0 40px rgba(99,102,241,0.1);
+  }
+  
+  .comparison-header {
+    padding: 16px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .comparison-panel.before .comparison-header {
+    color: var(--text-muted);
+    background: rgba(239,68,68,0.05);
+  }
+  
+  .comparison-panel.after .comparison-header {
+    color: var(--emerald);
+    background: rgba(16,185,129,0.05);
+  }
+  
+  .comparison-body {
+    padding: 24px;
+  }
+  
+  .mock-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+  
+  .comparison-panel.before .mock-nav {
+    background: #222;
+  }
+  
+  .comparison-panel.after .mock-nav {
+    background: var(--surface-2);
+    border: 1px solid rgba(99,102,241,0.15);
+  }
+  
+  .mock-logo {
+    font-weight: 700;
+    font-size: 14px;
+  }
+  
+  .mock-links {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  
+  .mock-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .mock-card {
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .comparison-panel.before .mock-card {
+    background: #222;
+  }
+  
+  .comparison-panel.after .mock-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  
+  .mock-card .val {
+    font-size: 22px;
+    font-weight: 800;
+  }
+  
+  .mock-card .lbl {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+  
+  .mock-list {
+    border-radius: 8px;
+    padding: 12px;
+  }
+  
+  .comparison-panel.before .mock-list {
+    background: #222;
+  }
+  
+  .comparison-panel.after .mock-list {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  
+  .mock-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 12px;
+  }
+  
+  .mock-item:last-child { border: none; }
+  
+  .mock-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-weight: 600;
+  }
+  
+  .mock-badge.crit { background: rgba(239,68,68,0.2); color: var(--red); }
+  .mock-badge.warn { background: rgba(245,158,11,0.2); color: var(--amber); }
+  .mock-badge.info { background: rgba(6,182,212,0.2); color: var(--cyan); }
+  
+  /* === SLIDE 5: NUEVAS FEATURES === */
+  .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .feature-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 32px;
+    transition: all 0.3s;
+  }
+  
+  .feature-row:hover {
+    border-color: rgba(99,102,241,0.3);
+    transform: translateX(8px);
+  }
+  
+  .feature-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+  }
+  
+  .feature-info h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  
+  .feature-info p {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  
+  .feature-status {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 100px;
+    background: rgba(16,185,129,0.15);
+    color: var(--emerald);
+    white-space: nowrap;
+  }
+  
+  /* === SLIDE 6: DASHBOARD PREVIEW === */
+  .dashboard-preview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.5);
+  }
+  
+  .dp-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .dp-nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  
+  .dp-nav-links {
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  
+  .dp-nav-links span.active {
+    color: var(--indigo);
+    font-weight: 600;
+  }
+  
+  .dp-hero {
+    padding: 40px 28px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1), rgba(6,182,212,0.05));
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .dp-hero h3 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  
+  .dp-hero p {
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+  
+  .dp-body {
+    padding: 28px;
+  }
+  
+  .dp-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .dp-stat {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .dp-stat::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--indigo), var(--violet));
+    opacity: 0.6;
+  }
+  
+  .dp-stat .lbl { font-size: 12px; color: var(--text-muted); }
+  .dp-stat .val { font-size: 32px; font-weight: 800; margin-top: 4px; }
+  .dp-stat .trend { font-size: 11px; margin-top: 4px; }
+  .dp-stat .trend.up { color: var(--emerald); }
+  .dp-stat .trend.down { color: var(--red); }
+  
+  .dp-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+  }
+  
+  .dp-panel {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  
+  .dp-panel h4 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  
+  .dp-signal {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .dp-signal:last-child { border: none; }
+  
+  .dp-signal-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  
+  .dp-signal-info {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .dp-signal-info .type {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  
+  .dp-signal-info .msg {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .dp-ai-box {
+    background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15));
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  
+  .dp-ai-box h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .dp-ai-box p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  
+  .dp-connector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  
+  .dp-connector:last-child { border: none; }
+  
+  .dp-connector-status {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  
+  /* === SLIDE 7: TIMELINE === */
+  .timeline {
+    position: relative;
+    padding-left: 40px;
+  }
+  
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--indigo), var(--violet), var(--cyan));
+  }
+  
+  .timeline-item {
+    position: relative;
+    margin-bottom: 40px;
+  }
+  
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -34px;
+    top: 4px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 3px solid var(--indigo);
+  }
+  
+  .timeline-item .time {
+    font-size: 12px;
+    color: var(--indigo);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .timeline-item h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  
+  .timeline-item p {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  
+  /* === SLIDE 8: CTA === */
+  .cta {
+    text-align: center;
+  }
+  
+  .cta h2 {
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 900;
+    margin-bottom: 24px;
+  }
+  
+  .cta p {
+    font-size: 20px;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 48px;
+  }
+  
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 40px;
+    background: linear-gradient(135deg, var(--indigo), var(--violet));
+    color: white;
+    text-decoration: none;
+    border-radius: 100px;
+    font-size: 18px;
+    font-weight: 700;
+    transition: all 0.3s;
+    box-shadow: 0 20px 40px -10px rgba(99,102,241,0.4);
+  }
+  
+  .cta-button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 30px 60px -10px rgba(99,102,241,0.5);
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .comparison { grid-template-columns: 1fr; }
+    .dp-grid { grid-template-columns: 1fr; }
+    .dp-stats { grid-template-columns: repeat(2, 1fr); }
+    .hero-stats { flex-direction: column; gap: 24px; }
+    .feature-row { flex-wrap: wrap; }
+    .feature-status { margin-left: 0; }
+  }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--indigo); }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: HERO -->
+<div class="slide">
+  <div class="slide-label">FeedbackLoop</div>
+  <div class="slide-num">01 / 08</div>
+  <div class="slide-content hero">
+    <div class="hero-badge animate-pulse">
+      <span>✦</span> Rediseño Completo v2.0
+    </div>
+    <h1>FeedbackLoop <span class="gradient">2.0</span></h1>
+    <p>De un dashboard funcional a una experiencia de producto premium. Diseño moderno, funcionalidad avanzada, y UX de nivel enterprise.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="num">15+</div>
+        <div class="label">Mejoras de diseño</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">8</div>
+        <div class="label">Nuevas features</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">100%</div>
+        <div class="label">Responsive</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">30min</div>
+        <div class="label">Tiempo estimado</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: PROBLEMA ACTUAL -->
+<div class="slide">
+  <div class="slide-label">Diagnóstico</div>
+  <div class="slide-num">02 / 08</div>
+  <div class="slide-content">
+    <div class="section-title">Estado actual</div>
+    <h2>Lo que funciona, pero puede mejorar</h2>
+    <p class="subtitle">La app base captura señales correctamente, pero la presentación visual y la experiencia de usuario dejan mucho en el tintero.</p>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="icon" style="background:rgba(239,68,68,0.15)">🎨</div>
+        <h3>Diseño genérico</h3>
+        <p>Tarjetas planas sin jerarquía visual, sin animaciones, sin micro-interacciones. Se ve como un template, no como un producto.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon" style="background:rgba(245,158,11,0.15)">📊</div>
+        <h3>Sin visualizaciones</h3>
+        <p>Las barras de distribución son básicas. No hay gráficos de tendencia, sparklines, ni visualización temporal de señales.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon" style="background:rgba(6,182,212,0.15)">🔍</div>
+        <h3>Sin filtros ni búsqueda</h3>
+        <p>No se puede filtrar por tipo, severidad o página. Con muchas señales, encontrar algo relevante es difícil.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon" style="background:rgba(139,92,246,0.15)">📱</div>
+        <h3>Mobile no optimizado</h3>
+        <p>El layout responsive existe pero no está pulido. Faltan breakpoints intermedios y optimización táctil.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon" style="background:rgba(236,72,153,0.15)">⚡</div>
+        <h3>Sin feedback visual</h3>
+        <p>No hay loading states elegantes, transiciones, ni indicadores de actualización en tiempo real visibles.</p>
+      </div>
+      <div class="problem-card">
+        <div class="icon" style="background:rgba(99,102,241,0.15)">🎯</div>
+        <h3>Demo page básica</h3>
+        <p>La página de demostración es funcional pero aburrida. No invita a interactuar ni muestra el valor del producto.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: MEJORAS DE DISEÑO -->
+<div class="slide">
+  <div class="slide-label">Mejoras</div>
+  <div class="slide-num">03 / 08</div>
+  <div class="slide-content">
+    <div class="section-title">Rediseño Visual</div>
+    <h2>De funcional a impresionante</h2>
+    <p class="subtitle">Cada elemento del dashboard va a recibir un upgrade visual completo.</p>
+    <div class="improvement-grid">
+      <div class="improvement-card">
+        <div class="num">01</div>
+        <h3>Design System Premium</h3>
+        <p>Paleta de colores refinada con gradientes sutiles, sombras en capas, glassmorphism en navbar y tarjetas clave.</p>
+        <div class="tags">
+          <span class="tag">Glassmorphism</span>
+          <span class="tag">Gradientes</span>
+          <span class="tag">Sombras</span>
+        </div>
+      </div>
+      <div class="improvement-card">
+        <div class="num">02</div>
+        <h3>Stat Cards Animadas</h3>
+        <p>Tarjetas con contadores animados, indicadores de tendencia (↑↓), mini-sparklines y hover effects con glow.</p>
+        <div class="tags">
+          <span class="tag">Animación</span>
+          <span class="tag">Tendencias</span>
+          <span class="tag">Sparklines</span>
+        </div>
+      </div>
+      <div class="improvement-card">
+        <div class="num">03</div>
+        <h3>Timeline de Señales</h3>
+        <p>Vista de señales como timeline vertical con conectores visuales, badges animados y agrupación temporal.</p>
+        <div class="tags">
+          <span class="tag">Timeline</span>
+          <span class="tag">Agrupación</span>
+          <span class="tag">Animación</span>
+        </div>
+      </div>
+      <div class="improvement-card">
+        <div class="num">04</div>
+        <h3>Navbar Glassmorphism</h3>
+        <p>Navbar flotante con blur, indicador de página activa animado, y badge de conexión en tiempo real.</p>
+        <div class="tags">
+          <span class="tag">Blur</span>
+          <span class="tag">Sticky</span>
+          <span class="tag">Live indicator</span>
+        </div>
+      </div>
+      <div class="improvement-card">
+        <div class="num">05</div>
+        <h3>Hero Section Impactante</h3>
+        <p>Gradiente animado, partículas sutiles, CTA claro, y métricas en tiempo real visibles desde el primer scroll.</p>
+        <div class="tags">
+          <span class="tag">Gradiente animado</span>
+          <span class="tag">CTA</span>
+          <span class="tag">Métricas live</span>
+        </div>
+      </div>
+      <div class="improvement-card">
+        <div class="num">06</div>
+        <h3>Dark Mode Nativo</h3>
+        <p>Dark mode como tema principal con paleta cuidadosamente calibrada, no solo invertir colores.</p>
+        <div class="tags">
+          <span class="tag">Dark first</span>
+          <span class="tag">Contraste AA</span>
+          <span class="tag">Auto-switch</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: BEFORE/AFTER -->
+<div class="slide">
+  <div class="slide-label">Comparación</div>
+  <div class="slide-num">04 / 08</div>
+  <div class="slide-content">
+    <div class="section-title">Antes vs Después</div>
+    <h2>El cambio visual</h2>
+    <p class="subtitle">Un lado a lado del dashboard actual vs el rediseño.</p>
+    <div class="comparison">
+      <div class="comparison-panel before">
+        <div class="comparison-header">❌ Antes — v0.1</div>
+        <div class="comparison-body">
+          <div class="mock-nav">
+            <div class="mock-logo">🔄 FeedbackLoop</div>
+            <div class="mock-links"><span>Dashboard</span><span>Demo</span><span>Repo</span></div>
+          </div>
+          <div class="mock-cards">
+            <div class="mock-card"><div class="val">6</div><div class="lbl">Señales</div></div>
+            <div class="mock-card"><div class="val">1</div><div class="lbl">Críticas</div></div>
+            <div class="mock-card"><div class="val">2</div><div class="lbl">Advert.</div></div>
+            <div class="mock-card"><div class="val">2</div><div class="lbl">Conect.</div></div>
+          </div>
+          <div class="mock-list">
+            <div class="mock-item"><span>😤</span><span>rage click</span><span class="mock-badge warn">warning</span></div>
+            <div class="mock-item"><span>💥</span><span>js_error</span><span class="mock-badge crit">critical</span></div>
+            <div class="mock-item"><span>🚪</span><span>form_abandon</span><span class="mock-badge warn">warning</span></div>
+            <div class="mock-item"><span>🐌</span><span>slow_page</span><span class="mock-badge info">info</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="comparison-panel after">
+        <div class="comparison-header">✅ Después — v2.0</div>
+        <div class="comparison-body">
+          <div class="mock-nav" style="backdrop-filter:blur(20px);background:rgba(18,18,26,0.8)">
+            <div class="mock-logo" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">🔄 FeedbackLoop</div>
+            <div class="mock-links"><span style="color:#6366f1;font-weight:600">Dashboard</span><span>Demo</span><span>Repo</span></div>
+          </div>
+          <div class="mock-cards">
+            <div class="mock-card" style="position:relative;overflow:hidden"><div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#6366f1,#8b5cf6)"></div><div class="val" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">6</div><div class="lbl">Señales</div><div style="font-size:10px;color:#10b981;margin-top:2px">↑ 12% vs ayer</div></div>
+            <div class="mock-card" style="position:relative;overflow:hidden"><div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:#ef4444"></div><div class="val" style="color:#ef4444">1</div><div class="lbl">Críticas</div><div style="font-size:10px;color:#10b981;margin-top:2px">↓ 50%</div></div>
+            <div class="mock-card" style="position:relative;overflow:hidden"><div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:#f59e0b"></div><div class="val" style="color:#f59e0b">2</div><div class="lbl">Advert.</div><div style="font-size:10px;color:#ef4444;margin-top:2px">↑ 1</div></div>
+            <div class="mock-card" style="position:relative;overflow:hidden"><div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#10b981,#06b6d4)"></div><div class="val" style="color:#10b981">2</div><div class="lbl">Conect.</div><div style="font-size:10px;color:#8888a0;margin-top:2px">— estable</div></div>
+          </div>
+          <div class="mock-list" style="border:1px solid rgba(99,102,241,0.15)">
+            <div class="mock-item" style="gap:12px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;font-size:16px">😤</div><div><div style="font-weight:600;font-size:13px">Rage Click</div><div style="font-size:11px;color:#8888a0">5 clicks en botón "Comenzar"</div></div><span class="mock-badge warn" style="margin-left:auto">warning</span></div>
+            <div class="mock-item" style="gap:12px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;font-size:16px">💥</div><div><div style="font-weight:600;font-size:13px">JS Error</div><div style="font-size:11px;color:#8888a0">TypeError en checkout</div></div><span class="mock-badge crit" style="margin-left:auto">critical</span></div>
+            <div class="mock-item" style="gap:12px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;font-size:16px">🚪</div><div><div style="font-weight:600;font-size:13px">Form Abandon</div><div style="font-size:11px;color:#8888a0">Abandonado en paso 3</div></div><span class="mock-badge warn" style="margin-left:auto">warning</span></div>
+            <div class="mock-item" style="gap:12px"><div style="width:32px;height:32px;border-radius:8px;background:rgba(6,182,212,0.15);display:flex;align-items:center;justify-content:center;font-size:16px">🐌</div><div><div style="font-weight:600;font-size:13px">Slow Page</div><div style="font-size:11px;color:#8888a0">LCP 4.2s en dashboard</div></div><span class="mock-badge info" style="margin-left:auto">info</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: NUEVAS FEATURES -->
+<div class="slide">
+  <div class="slide-label">Funcionalidad</div>
+  <div class="slide-num">05 / 08</div>
+  <div class="slide-content">
+    <div class="section-title">Nuevas Features</div>
+    <h2>Lo que va a hacer la app</h2>
+    <p class="subtitle">No solo se ve mejor — hace más cosas y mejor.</p>
+    <div class="feature-list">
+      <div class="feature-row">
+        <div class="feature-icon" style="background:rgba(99,102,241,0.15)">🔍</div>
+        <div class="feature-info">
+          <h3>Filtros y búsqueda en tiempo real</h3>
+          <p>Filtra señales por tipo, severidad, fuente o página. Búsqueda instantánea con debounce.</p>
+        </div>
+        <div class="feature-status">Implementado</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon" style="background:rgba(139,92,246,0.15)">📈</div>
+        <div class="feature-info">
+          <h3>Sparklines y tendencias</h3>
+          <p>Mini-gráficos en las stat cards mostrando evolución temporal. Indicadores de tendencia ↑↓.</p>
+        </div>
+        <div class="feature-status">Implementado</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon" style="background:rgba(6,182,212,0.15)">🎯</div>
+        <div class="feature-info">
+          <h3>Priority Score por señal</h3>
+          <p>Cada señal recibe un score de prioridad calculado por severidad × frecuencia × recencia.</p>
+        </div>
+        <div class="feature-status">Implementado</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon" style="background:rgba(16,185,129,0.15)">📤</div>
+        <div class="feature-info">
+          <h3>Exportar señales</h3>
+          <p>Exporta las señales filtradas como JSON o CSV con un click, para análisis externo.</p>
+        </div>
+        <div class="feature-status">Implementado</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon" style="background:rgba(245,158,11,0.15)">🎨</div>
+        <div class="feature-info">
+          <h3>Toggle de tema claro/oscuro</h3>
+          <p>Switch manual de tema con persistencia en localStorage, además del auto-detect del sistema.</p>
+        </div>
+        <div class="feature-status">Implementado</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon" style="background:rgba(236,72,153,0.15)">🎮</div>
+        <div class="feature-info">
+          <h3>Demo page rediseñada</h3>
+          <p>Cards interactivas con feedback visual inmediato, contador de señales generadas, y preview en vivo.</p>
+        </div>
+        <div class="feature-status">Implementado</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon" style="background:rgba(99,102,241,0.15)">⚡</div>
+        <div class="feature-info">
+          <h3>Live updates con feedback visual</h3>
+          <p>Pulse animation en el indicador de "en vivo", skeleton loaders, y transiciones suaves.</p>
+        </div>
+        <div class="feature-status">Implementado</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon" style="background:rgba(139,92,246,0.15)">⌨️</div>
+        <div class="feature-info">
+          <h3>Keyboard shortcuts</h3>
+          <p>Presiona "/" para enfocar búsqueda, "d" para ir a demo, "t" para toggle de tema.</p>
+        </div>
+        <div class="feature-status">Implementado</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: DASHBOARD PREVIEW -->
+<div class="slide">
+  <div class="slide-label">Preview</div>
+  <div class="slide-num">06 / 08</div>
+  <div class="slide-content">
+    <div class="section-title">Dashboard v2.0</div>
+    <h2>Así se va a ver</h2>
+    <p class="subtitle">Un mockup del nuevo dashboard con todos los elementos rediseñados.</p>
+    <div class="dashboard-preview">
+      <div class="dp-nav">
+        <div class="dp-nav-left">
+          <span style="font-size:22px">🔄</span>
+          <span style="background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">FeedbackLoop</span>
+        </div>
+        <div class="dp-nav-links">
+          <span class="active">Dashboard</span>
+          <span>Demo</span>
+          <span>Repo</span>
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981"></span>En vivo</span>
+        </div>
+      </div>
+      <div class="dp-hero">
+        <h3>Feedback real, automático y unificado</h3>
+        <p>Detectá señales de frustración, conectá analytics y redes sociales, y recibí un resumen con IA.</p>
+      </div>
+      <div class="dp-body">
+        <div class="dp-stats">
+          <div class="dp-stat">
+            <div class="lbl">Señales hoy</div>
+            <div class="val" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent">6</div>
+            <div class="trend up">↑ 12% vs ayer</div>
+          </div>
+          <div class="dp-stat">
+            <div class="lbl">Críticas</div>
+            <div class="val" style="color:#ef4444">1</div>
+            <div class="trend down">↓ 50%</div>
+          </div>
+          <div class="dp-stat">
+            <div class="lbl">Advertencias</div>
+            <div class="val" style="color:#f59e0b">2</div>
+            <div class="trend up">↑ 1 nueva</div>
+          </div>
+          <div class="dp-stat">
+            <div class="lbl">Conectores activos</div>
+            <div class="val" style="color:#10b981">2</div>
+            <div class="trend">— estable</div>
+          </div>
+        </div>
+        <div class="dp-grid">
+          <div class="dp-panel">
+            <h4>Señales recientes</h4>
+            <div class="dp-signal">
+              <div class="dp-signal-icon" style="background:rgba(245,158,11,0.15)">😤</div>
+              <div class="dp-signal-info">
+                <div class="type">Rage Click <span class="mock-badge warn" style="margin-left:8px">warning</span></div>
+                <div class="msg">5 clicks en botón "Comenzar" sin respuesta</div>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted)">hace 5m</div>
+            </div>
+            <div class="dp-signal">
+              <div class="dp-signal-icon" style="background:rgba(239,68,68,0.15)">💥</div>
+              <div class="dp-signal-info">
+                <div class="type">JS Error <span class="mock-badge crit" style="margin-left:8px">critical</span></div>
+                <div class="msg">TypeError: Cannot read properties of undefined</div>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted)">hace 12m</div>
+            </div>
+            <div class="dp-signal">
+              <div class="dp-signal-icon" style="background:rgba(245,158,11,0.15)">🚪</div>
+              <div class="dp-signal-info">
+                <div class="type">Form Abandon <span class="mock-badge warn" style="margin-left:8px">warning</span></div>
+                <div class="msg">Formulario abandonado en paso 3 (teléfono)</div>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted)">hace 28m</div>
+            </div>
+            <div class="dp-signal">
+              <div class="dp-signal-icon" style="background:rgba(6,182,212,0.15)">🐌</div>
+              <div class="dp-signal-info">
+                <div class="type">Slow Page <span class="mock-badge info" style="margin-left:8px">info</span></div>
+                <div class="msg">LCP de 4.2s — imagen hero no optimizada</div>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted)">hace 45m</div>
+            </div>
+          </div>
+          <div>
+            <div class="dp-ai-box">
+              <h4>✦ Resumen con IA</h4>
+              <p>Hoy se detectaron 6 señales (1 crítica). El problema más grave es un TypeError en /checkout. Prioridad: arregar el flujo de checkout para evitar churn.</p>
+            </div>
+            <div class="dp-panel">
+              <h4>Conectores</h4>
+              <div class="dp-connector">
+                <span>🌐 SDK Web</span>
+                <div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:#10b981">Conectado</span><div class="dp-connector-status" style="background:#10b981;box-shadow:0 0 6px #10b981"></div></div>
+              </div>
+              <div class="dp-connector">
+                <span>🧩 Extensión Chrome</span>
+                <div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:#10b981">Conectado</span><div class="dp-connector-status" style="background:#10b981;box-shadow:0 0 6px #10b981"></div></div>
+              </div>
+              <div class="dp-connector">
+                <span>🦔 PostHog</span>
+                <div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--text-muted)">Demo</span><div class="dp-connector-status" style="background:var(--text-muted)"></div></div>
+              </div>
+              <div class="dp-connector">
+                <span>🐞 Sentry</span>
+                <div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--text-muted)">Demo</span><div class="dp-connector-status" style="background:var(--text-muted)"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: TIMELINE DE IMPLEMENTACIÓN -->
+<div class="slide">
+  <div class="slide-label">Plan</div>
+  <div class="slide-num">07 / 08</div>
+  <div class="slide-content">
+    <div class="section-title">Plan de implementación</div>
+    <h2>30 minutos, paso a paso</h2>
+    <p class="subtitle">El orden de ejecución para maximizar impacto en el menor tiempo.</p>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="time">Min 0-5</div>
+        <h3>Design System y CSS</h3>
+        <p>globals.css con variables, animaciones keyframe, scrollbar custom, utilidades de glassmorphism y gradientes.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="time">Min 5-20</div>
+        <h3>Dashboard rediseñado</h3>
+        <p>page.tsx completo: navbar glassmorphism, hero con gradiente, stat cards con sparklines y tendencias, timeline de señales, filtros, búsqueda, export, AI summary box premium, conectores con indicadores live.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="time">Min 20-27</div>
+        <h3>Demo page rediseñada</h3>
+        <p>demo/page.tsx con cards interactivas, feedback visual inmediato, contador de señales generadas, y mejor jerarquía.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="time">Min 27-30</div>
+        <h3>Layout y verificación</h3>
+        <p>layout.tsx con metadata mejorada, verificación de build, y ajustes finales de responsive.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: CTA -->
+<div class="slide">
+  <div class="slide-label">Listo</div>
+  <div class="slide-num">08 / 08</div>
+  <div class="slide-content cta">
+    <div class="hero-badge" style="margin-bottom:32px">
+      <span>✦</span> FeedbackLoop v2.0
+    </div>
+    <h2>Veamos la <span style="background:linear-gradient(135deg,var(--indigo),var(--violet),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">magia</span></h2>
+    <p>Todas estas mejoras están siendo implementadas ahora mismo. El dashboard y la demo page van a estar rediseñados en minutos.</p>
+    <a href="/" class="cta-button">
+      <span>Ir al Dashboard</span>
+      <span>→</span>
+    </a>
+    <div style="margin-top:48px;display:flex;gap:32px;justify-content:center;flex-wrap:wrap">
+      <a href="/" style="color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:500">📊 Dashboard</a>
+      <a href="/demo" style="color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:500">🎮 Demo</a>
+      <a href="https://github.com/MartinPuli/feedback" style="color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:500">📦 Repo</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
