@@ -12,6 +12,7 @@ type Signal = {
   selector?: string;
   timestamp: string;
   source: string;
+  site?: string;
 };
 
 type Connector = {
@@ -53,6 +54,7 @@ const typeIcon: Record<string, string> = {
   u_turn: '↩️',
   dead_click: '🖱️',
   micro_survey: '💬',
+  network_error: '📡',
 };
 
 const typeLabel: Record<string, string> = {
@@ -63,6 +65,7 @@ const typeLabel: Record<string, string> = {
   u_turn: 'U-Turn',
   dead_click: 'Dead Click',
   micro_survey: 'Micro Survey',
+  network_error: 'Network Error',
 };
 
 const sentimentStyle: Record<Review['sentiment'], string> = {
@@ -175,14 +178,17 @@ export default function Home() {
   }, [load]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    if (saved) {
-      setTheme(saved);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-    } else {
-      setTheme('light');
-    }
+    const id = requestAnimationFrame(() => {
+      const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
+      if (saved) {
+        setTheme(saved);
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark');
+      } else {
+        setTheme('light');
+      }
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
 
   useEffect(() => {
@@ -245,6 +251,22 @@ export default function Home() {
   const warningSpark = [1, 3, 2, 4, 3, 2, 3, warnings];
   const connectorSpark = [1, 2, 2, 2, 3, 2, 2, connected];
 
+  const [simulating, setSimulating] = useState(false);
+
+  async function simulateBurst() {
+    setSimulating(true);
+    try {
+      await fetch('/api/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario: 'random_burst', count: 6 }),
+      });
+      await load();
+    } finally {
+      setSimulating(false);
+    }
+  }
+
   function exportSignals() {
     const data = JSON.stringify(filteredSignals, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
@@ -275,6 +297,9 @@ export default function Home() {
             </Link>
             <Link href="/demo" className="text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
               Demo
+            </Link>
+            <Link href="/connect" className="text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+              Conectar
             </Link>
             <a href="/presentation.html" className="text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
               Presentación
@@ -361,6 +386,13 @@ export default function Home() {
                 </h2>
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={simulateBurst}
+                    disabled={simulating}
+                    className="text-xs font-medium px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 hover:bg-orange-500/20 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    {simulating ? '⏳ Generando...' : '🎬 Simular señales'}
+                  </button>
+                  <button
                     onClick={exportSignals}
                     className="text-xs font-medium px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors flex items-center gap-1.5"
                   >
@@ -429,6 +461,11 @@ export default function Home() {
                         </span>
                         <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">{signal.page}</span>
                         <span className="text-[10px] text-zinc-400 px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800">{signal.source}</span>
+                        {signal.site && (
+                          <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                            🌐 {signal.site}
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1 line-clamp-2">{signal.message}</p>
                       {signal.selector && (
