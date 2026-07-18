@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        width: 320px;
+        padding: 16px;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 0;
+      }
+      h1 {
+        font-size: 16px;
+        margin: 0 0 12px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        margin-bottom: 4px;
+        color: #555;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        margin-bottom: 12px;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        background: #4f46e5;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #4338ca;
+      }
+      .status {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #16a34a;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>FeedbackLoop</h1>
+    <label for="endpoint">Endpoint de feedback</label>
+    <input id="endpoint" type="url" placeholder="https://tudominio.com/api/feedback" />
+    <button id="save">Guardar</button>
+    <div class="status" id="status"></div>
+    <script src="popup.js"></script>
+  </body>
+</html>
