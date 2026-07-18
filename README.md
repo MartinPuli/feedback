@@ -4,110 +4,100 @@ MVP de una herramienta que detecta **feedback real y automático** en apps sin d
 
 ## Qué hace
 
-- Captura señales de frustración y problemas de UX: *rage clicks*, *dead clicks*, errores JS, abandono de formularios, U-turns, páginas lentas y micro-encuestas opcionales.
-- Conecta con múltiples fuentes para unificar el feedback: **PostHog, Sentry, Google Analytics 4, Mixpanel, Amplitude, Intercom, Crisp** y más.
-- Usa **IA** para generar un resumen diario accionable.
-- Entrega un dashboard para startups y apps.
-- **Extensión de Chrome** para recolectar feedback sin tocar código.
+- Captura señales de frustración y problemas de UX: *rage clicks*, *dead clicks*, errores JS, abandono de formularios, U-turns, páginas lentas y micro-encuestas inteligentes.
+- Conecta con múltiples fuentes: **PostHog, Sentry, Google Analytics 4, Mixpanel, Amplitude, Intercom, Crisp** y más.
+- **Social listener**: busca reseñas y menciones en **Reddit, Twitter/X, Trustpilot, G2, Capterra**.
+- **IA** que resume diariamente el feedback y sugiere acciones.
+- Entrega un dashboard en tiempo real.
+- **SDK web** y **extensión de Chrome** para recolectar feedback sin tocar código.
 
 ## Tecnología
 
 - [Next.js](https://nextjs.org/) App Router
 - Tailwind CSS
-- Supabase para almacenamiento
-- OpenAI para resúmenes (con fallback heurístico si no hay key)
+- Supabase para almacenamiento (fallback en memoria para demo local)
+- OpenAI para resúmenes (con fallback heurístico)
 - Vercel para deploy
 
 ## Empezar
 
-1. Instalar dependencias:
-
 ```bash
 npm install
-```
-
-2. Copiar variables de entorno:
-
-```bash
 cp .env.example .env.local
-```
-
-3. Completar `.env.local` con tus keys. Si no las tenés, el proyecto corre con **datos demo**.
-
-4. Correr local:
-
-```bash
 npm run dev
 ```
 
-Abrir [http://localhost:3000](http://localhost:3000).
+Abrí [http://localhost:3000](http://localhost:3000) para el dashboard y [http://localhost:3000/demo](http://localhost:3000/demo) para probar el SDK.
 
-## Opciones de instalación
+Si no completás las keys, el proyecto corre con **datos demo** y persiste señales en memoria (perfecto para probar local).
 
-### 1. SDK Web
+## Opciones de recolección
 
-Agregá este script al `<head>` de tu web:
+### 1. SDK Web (1 línea)
 
 ```html
 <script src="/feedback.js" async data-survey="true"></script>
 ```
 
-Para otro dominio, apuntá `data-endpoint` a tu API:
+Con pregunta personalizada:
 
 ```html
-<script src="https://tudominio.com/feedback.js" async data-endpoint="https://tudominio.com/api/feedback" data-survey="true"></script>
+<script
+  src="/feedback.js"
+  async
+  data-survey="true"
+  data-question="¿Qué te falta para decidirte?"
+  data-options="Precios,Funciones,Soporte,No lo sé"
+></script>
 ```
+
+NPS:
+
+```html
+<script src="/feedback.js" async data-survey="nps"></script>
+```
+
+Las micro-encuestas se disparan automáticamente ante:
+- Rage clicks
+- 2+ dead clicks
+- 25 segundos + 3 clics en la página
+- Exit intent (cursor sale por arriba)
 
 ### 2. Extensión de Chrome
 
 1. Descargar [`feedback-extension.zip`](./public/feedback-extension.zip).
-2. Descomprimir en una carpeta.
-3. Ir a `chrome://extensions`, activar modo desarrollador.
-4. Cargar carpeta descomprimida.
-5. Configurar el endpoint en el popup de la extensión (por defecto `http://localhost:3000/api/feedback`).
+2. Descomprimir.
+3. Ir a `chrome://extensions`, activar modo desarrollador y cargar la carpeta.
+4. Configurar el endpoint en el popup.
 
-La extensión recolecta feedback de cualquier sitio web que visites.
+### 3. Conectores
 
-## Eventos capturados
+Seteá las variables de entorno para activar cada fuente (ver `.env.example`).
 
-| Evento | Cuándo se dispara |
-| --- | --- |
-| `rage_click` | 3+ clicks en el mismo elemento en menos de 700ms |
-| `dead_click` | Click en un elemento que no es interactivo |
-| `js_error` | Errores de JS o promesas no manejadas |
-| `form_abandon` | Usuario empieza un formulario y abandona la página |
-| `u_turn` | Vuelve a la página anterior inmediatamente |
-| `slow_page` | Tiempo de carga total mayor a 3s |
-| `micro_survey` | Pregunta opcional al usuario |
+## Demo integrado
 
-## Integraciones
+La ruta `/demo` es una app de prueba con botones para disparar:
+- Rage clicks
+- Dead clicks
+- Errores JS
+- Abandono de formulario
 
-Seteá las variables de entorno correspondientes para activar cada conector:
-
-- `POSTHOG_API_KEY`, `POSTHOG_PROJECT_ID`, `POSTHOG_HOST`
-- `SENTRY_AUTH_TOKEN`, `SENTRY_ISSUES_URL`
-- `GA4_PROPERTY_ID`, `GA4_CREDENTIALS`
-- `MIXPANEL_PROJECT_ID`, `MIXPANEL_SERVICE_ACCOUNT`
-- `AMPLITUDE_API_KEY`
-- `INTERCOM_ACCESS_TOKEN`
-- `CRISP_TOKEN_ID`, `CRISP_TOKEN_KEY`
-- `SUPABASE_URL`, `SUPABASE_ANON_KEY` (para persistir señales)
-- `OPENAI_API_KEY` (resúmenes con GPT-4o-mini)
+El dashboard se actualiza automáticamente cada 5 segundos y muestra las señales que generás en el demo.
 
 ## Deploy en Vercel
 
-La forma más fácil es conectar el repositorio en la UI de Vercel o, si tenés un token, usar Vercel CLI:
+Con token:
 
 ```bash
 npx vercel --prod
 ```
 
-Recordá agregar las variables de entorno en el dashboard de Vercel.
+O conectá el repo `MartinPuli/feedback` desde la UI de Vercel. Agregá las variables de entorno ahí.
 
 ## Roadmap
 
-- [ ] Conectores reales para todas las fuentes
-- [ ] Alertas por Slack/Email
-- [ ] Filtros y búsqueda en el dashboard
-- [ ] SDK para React Native / Flutter
+- [ ] Conectores reales con tests
+- [ ] Alertas Slack/Email
+- [ ] Filtros y búsqueda avanzada
+- [ ] SDK React Native / Flutter
 - [ ] Publicar extensión en Chrome Web Store
