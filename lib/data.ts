@@ -1,4 +1,5 @@
 import { fetchRealSignals, getConnectors } from '@/lib/connectors';
+import { getSignals, saveSignal } from '@/lib/store';
 
 export type FeedbackSignal = {
   id: string;
@@ -73,21 +74,13 @@ const demos: FeedbackSignal[] = [
 
 export async function getFeedbackSignals(): Promise<FeedbackSignal[]> {
   const real = await fetchRealSignals();
+  const live = getSignals();
 
-  // Si no hay conectores reales configurados, devolvemos demo.
+  // Si no hay conectores reales configurados ni señales en vivo, devolvemos demo.
   const anyConnected = getConnectors().some((c) => c.status === 'connected' && c.id !== 'sdk' && c.id !== 'extension');
-  if (!anyConnected && real.length === 0) {
-    return demos;
-  }
+  const seed = anyConnected || live.length > 0 ? [] : demos;
 
-  return [
-    ...demos,
-    ...real.map((s) => ({
-      ...s,
-      id: Math.random().toString(36).slice(2),
-      timestamp: new Date().toISOString(),
-    })),
-  ];
+  return [...live, ...real.map((s) => ({ ...s, id: Math.random().toString(36).slice(2), timestamp: new Date().toISOString() })), ...seed];
 }
 
 export async function ingestSignal(signal: Omit<FeedbackSignal, 'id' | 'timestamp'>) {
@@ -96,6 +89,9 @@ export async function ingestSignal(signal: Omit<FeedbackSignal, 'id' | 'timestam
     id: Math.random().toString(36).slice(2),
     timestamp: new Date().toISOString(),
   };
+
+  // Persistencia inmediata en memoria para que el dashboard la vea sin esperar Supabase.
+  saveSignal(enriched);
 
   if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
     try {
